@@ -133,13 +133,13 @@ with DAG('stepped_emr',
     )
 
     flow_sensor = EmrJobFlowSensor(task_id='flow_sensor',
-                               job_flow_id="{{ task_instance.xcom_pull('process_engine') }}",
-                               execution_timeout=timedelta(hours=1),
-                               on_retry_callback=clear_tasks_callback,
-                               params=dict(
-                                   task_ids_to_clear=['is_emr_exists', 'terminate_emr',
-                                                      'process_engine', 'flow_sensor'])
-                               )
+                                   job_flow_id="{{ task_instance.xcom_pull('process_engine') }}",
+                                   execution_timeout=timedelta(hours=1),
+                                   on_retry_callback=clear_tasks_callback,
+                                   params=dict(
+                                       task_ids_to_clear=['is_emr_exists', 'terminate_emr',
+                                                          'process_engine', 'flow_sensor'])
+                                   )
 
     end_of_dag = DummyOperator(task_id='end_of_dag',
                                trigger_rule=TriggerRule.NONE_FAILED_OR_SKIPPED)
