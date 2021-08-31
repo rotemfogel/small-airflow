@@ -3,7 +3,7 @@
 uniq_tag="$$@$(date +%s)"
 
 BASE_DIR="$(realpath ~)"
-TARGET_DIR="${BASE_DIR}/src/tar/data-science-airflow"
+TARGET_DIR="${BASE_DIR}/src/tar/small-airflow"
 DATED_DIR="${TARGET_DIR}-${uniq_tag}"
 OLD_DIR=$(realpath "${TARGET_DIR}")
 TARGET_VENV="${BASE_DIR}/venv/airflow"
@@ -26,7 +26,7 @@ echo Downloading latest tarball...
 rm -rf "${DATED_DIR}"
 mkdir -p "${DATED_DIR}"
 cd "${DATED_DIR}" || die "${DATED_DIR} does not exist $?"
-tar xf "${BASE_DIR}/src/git/data-science-airflow/release.tar.xz" || die "couldn't extract tarball $?"
+tar xf "${BASE_DIR}/src/git/small-airflow/release.tar.xz" || die "couldn't extract tarball $?"
 
 rm -rf "${DATED_VENV}"
 mkdir -p "${DATED_VENV}"
