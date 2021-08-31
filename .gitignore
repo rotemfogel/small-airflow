@@ -2,5 +2,6 @@
 .idea/
 build/
 logs/
-release.tar
+release.*
 requirements.txt
+wheelfreeze/
