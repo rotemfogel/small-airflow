@@ -1,0 +1,160 @@
+provision:
+  LogUri: "s3://{{ var.json.aws_emr_conf.LogUri }}/elasticmapreduce"
+  ReleaseLabel: "{{ var.json.aws_emr_conf.ReleaseLabel }}"
+  ServiceRole: "{{ var.json.aws_emr_conf.ServiceRole }}"
+  JobFlowRole: "{{ var.json.aws_emr_conf.JobFlowRole }}"
+  Configurations:
+    - Classification: spark-env
+      Configurations:
+        - Classification: export
+          Configurations: [ ]
+          Properties:
+            LD_LIBRARY_PATH: /usr/lib/hadoop/lib/native/
+    - Classification: "spark"
+      Configurations: [ ]
+      Properties:
+        maximizeResourceAllocation: "true"
+    - Classification: "spark-hive-site"
+      Properties:
+        hive.metastore.client.factory.class: "com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory"
+    - Classification: "hive-site"
+      Properties:
+        hive.metastore.client.factory.class: "com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory"
+  ScaleDownBehavior: "TERMINATE_AT_TASK_COMPLETION"
+  Applications:
+    - Name: "Spark"
+    - Name: "Hive"
+    - Name: "Hadoop"
+    - Name: "Ganglia"
+  VisibleToAllUsers: true
+  Name: "stepped_emr_{{ execution_date.format('%Y%m%d_%H') }}"
+  Steps:
+    - Name: "Setup Debugging"
+      ActionOnFailure: "TERMINATE_CLUSTER"
+      HadoopJarStep:
+        Jar: "command-runner.jar"
+        Args:
+          - "state-pusher-script"
+    - Name: "Step1"
+      ActionOnFailure: "TERMINATE_CLUSTER"
+      HadoopJarStep:
+        Jar: "command-runner.jar"
+        Args:
+          - "spark-submit"
+          - "--deploy-mode"
+          - "cluster"
+          - "--conf"
+          - "spark.executor.extraJavaOptions=-XX:+UseG1GC"
+          - "--conf"
+          - "spark.sql.caseSensitive=true"
+          - "--class"
+          - "me.rotemfo.spark.Step1"
+          - "s3://{{ var.value.data_bucket }}/accessories/jars/me.rotemfo.spark.jar"
+  Instances:
+    Ec2KeyName: "{{ var.json.aws_emr_conf.Ec2KeyName }}"
+    Ec2SubnetId: "{{ var.json.aws_emr_conf.Ec2SubnetId }}"
+    ServiceAccessSecurityGroup: "{{ var.json.aws_emr_conf.ServiceAccessSecurityGroup }}"
+    EmrManagedSlaveSecurityGroup: "{{ var.json.aws_emr_conf.EmrManagedSlaveSecurityGroup }}"
+    EmrManagedMasterSecurityGroup: "{{ var.json.aws_emr_conf.EmrManagedMasterSecurityGroup }}"
+    KeepJobFlowAliveWhenNoSteps: True
+    InstanceFleets:
+      - Name: "Master nodes"
+        InstanceFleetType: "MASTER"
+        TargetOnDemandCapacity: 0
+        TargetSpotCapacity: 1
+        LaunchSpecifications:
+          SpotSpecification:
+            TimeoutDurationMinutes: 30
+            TimeoutAction: "TERMINATE_CLUSTER"
+        InstanceTypeConfigs:
+          - InstanceType: "i2.xlarge"
+            WeightedCapacity: 1
+            BidPriceAsPercentageOfOnDemandPrice: 100
+          - InstanceType: "i3.xlarge"
+            WeightedCapacity: 1
+            BidPriceAsPercentageOfOnDemandPrice: 100
+          - InstanceType: "m5.xlarge"
+            WeightedCapacity: 1
+            BidPriceAsPercentageOfOnDemandPrice: 100
+            EbsConfiguration:
+              EbsBlockDeviceConfigs:
+                - VolumeSpecification:
+                    VolumeType: "gp2"
+                    SizeInGB: 256
+                  VolumesPerInstance: 2
+          - InstanceType: "r4.xlarge"
+            WeightedCapacity: 1
+            BidPriceAsPercentageOfOnDemandPrice: 100
+            EbsConfiguration:
+              EbsBlockDeviceConfigs:
+                - VolumeSpecification:
+                    VolumeType: "gp2"
+                    SizeInGB: 256
+                  VolumesPerInstance: 2
+          - InstanceType: "r5.xlarge"
+            WeightedCapacity: 1
+            BidPriceAsPercentageOfOnDemandPrice: 100
+            EbsConfiguration:
+              EbsBlockDeviceConfigs:
+                - VolumeSpecification:
+                    VolumeType: "gp2"
+                    SizeInGB: 256
+                  VolumesPerInstance: 2
+      - Name: "Core nodes"
+        InstanceFleetType: "CORE"
+        TargetOnDemandCapacity: 0
+        TargetSpotCapacity: 2
+        LaunchSpecifications:
+          SpotSpecification:
+            TimeoutDurationMinutes: 30
+            TimeoutAction: "TERMINATE_CLUSTER"
+        InstanceTypeConfigs:
+          - InstanceType: "i3.4xlarge"
+            WeightedCapacity: 1
+            BidPriceAsPercentageOfOnDemandPrice: 100
+          - InstanceType: "h1.4xlarge"
+            WeightedCapacity: 1
+            BidPriceAsPercentageOfOnDemandPrice: 100
+          - WeightedCapacity: 1
+            BidPriceAsPercentageOfOnDemandPrice: 100
+            InstanceType: "m5.4xlarge"
+            EbsConfiguration:
+              EbsBlockDeviceConfigs:
+                - VolumeSpecification:
+                    VolumeType: "gp2"
+                    SizeInGB: 512
+                  VolumesPerInstance: 2
+          - WeightedCapacity: 1
+            BidPriceAsPercentageOfOnDemandPrice: 100
+            InstanceType: "r4.4xlarge"
+            EbsConfiguration:
+              EbsBlockDeviceConfigs:
+                - VolumeSpecification:
+                    VolumeType: "gp2"
+                    SizeInGB: 512
+                  VolumesPerInstance: 2
+          - WeightedCapacity: 1
+            BidPriceAsPercentageOfOnDemandPrice: 100
+            InstanceType: "r5.4xlarge"
+            EbsConfiguration:
+              EbsBlockDeviceConfigs:
+                - VolumeSpecification:
+                    VolumeType: "gp2"
+                    SizeInGB: 512
+                  VolumesPerInstance: 2
+step_2:
+  - Name: "Step2"
+    ActionOnFailure: "TERMINATE_CLUSTER"
+    HadoopJarStep:
+      Jar: "command-runner.jar"
+      Args:
+        - "spark-submit"
+        - "--deploy-mode"
+        - "cluster"
+        - "--conf"
+        - "spark.executor.extraJavaOptions=-XX:+UseG1GC"
+        - "--conf"
+        - "spark.sql.caseSensitive=true"
+        - "--class"
+        - "me.rotemfo.spark.Step2"
+        - "s3://{{ var.value.data_bucket }}/accessories/jars/me.rotemfo.spark.jar"

@@ -1,0 +1,14 @@
+aws_emr_conf:
+  AutoScalingRole: EMR_AutoScaling_DefaultRole
+  Ec2KeyName: sa-staging-emr
+  Ec2SubnetId: subnet-0402d1819f29d51c9
+  EmrManagedMasterSecurityGroup: sg-057fe7bb416c5983f
+  EmrManagedSlaveSecurityGroup: sg-01ac84737e433b8e1
+  JobFlowRole: EMR_EC2_DefaultRole
+  LogUri: aws-logs-744522205193-us-west-2
+  ReleaseLabel: emr-5.30.1
+  ServiceAccessSecurityGroup: sg-02cc532fcc7432a57
+  ServiceRole: EMR_DefaultRole
+data_bucket: seekingalpha-data-dev
+data_bucket_override: seekingalpha-data-dev
+env: Development

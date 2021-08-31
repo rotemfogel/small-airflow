@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+# Export for the DAGs import test.
+CWD="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export AIRFLOW_HOME=$CWD/tests
+export AIRFLOW__CORE__DAGS_FOLDER=$CWD/dags
+export AIRFLOW__CORE__UNIT_TEST_MODE=True

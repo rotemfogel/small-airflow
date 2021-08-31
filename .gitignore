@@ -1,0 +1,5 @@
+.coverage
+.idea/
+logs/
+release.tar
+requirements.txt
